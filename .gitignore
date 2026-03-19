@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.pyo
+sa-key.json
+*.env
+.env
+node_modules/
+Project1_full_extracted.txt
+Seminar_Project1_extracted.txt
+Seminar_Project1.pdf
+*.pdf
