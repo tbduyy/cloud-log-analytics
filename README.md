@@ -101,6 +101,9 @@ SELECT * FROM ML.PREDICT(MODEL `analytics_ds.purchase_prediction`,
    - **Time Series:** `COUNT(user_id)` by `timestamp` (traffic per hour)
    - **Pie Chart:** `COUNT(action)` by `action` (action distribution)
 
+### Live Dashboard
+- [Website Analytics Dashboard](https://lookerstudio.google.com/reporting/8d204672-275a-4632-b700-d4075e46667b)
+
 ---
 
 ## GCP Services Used

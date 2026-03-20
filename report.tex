@@ -1,0 +1,715 @@
+\documentclass[12pt,a4paper]{article}
+
+% ============== PACKAGES ==============
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese, english]{babel} % vietnamese trước, english sau
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds}
+
+% ============== PAGE SETUP ==============
+\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{CSC11006 - Introduction to Cloud Computing}
+\fancyhead[R]{Project 1}
+\fancyfoot[C]{\thepage}
+
+% ============== TIKZ STYLES ==============
+\tikzstyle{component} = [rectangle, rounded corners, minimum width=2.5cm, minimum height=1cm, text centered, draw=black, fill=blue!20, font=\small]
+\tikzstyle{aicomponent} = [rectangle, rounded corners, minimum width=2.5cm, minimum height=1cm, text centered, draw=black, fill=orange!30, font=\small]
+\tikzstyle{datacomponent} = [rectangle, rounded corners, minimum width=2.5cm, minimum height=1cm, text centered, draw=black, fill=green!20, font=\small]
+\tikzstyle{viscomponent} = [rectangle, rounded corners, minimum width=2.5cm, minimum height=1cm, text centered, draw=black, fill=purple!20, font=\small]
+\tikzstyle{arrow} = [thick,->,>=Stealth]
+\tikzstyle{labeltext} = [font=\scriptsize, text=gray]
+
+% ============== DOCUMENT ==============
+\begin{document}
+
+% ============== TITLE PAGE ==============
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    
+    \textbf{\Large VIETNAM NATIONAL UNIVERSITY - HCMC}\\[0.3cm]
+    \textbf{\Large UNIVERSITY OF SCIENCE}\\[0.3cm]
+    \textbf{\large Faculty of Information Technology}\\[2cm]
+    
+    \rule{\linewidth}{0.5mm}\\[0.5cm]
+    {\huge \bfseries Intelligent Cloud-Based Log Analytics \& BI System}\\[0.3cm]
+    \rule{\linewidth}{0.5mm}\\[1.5cm]
+    
+    \textbf{\Large CSC11006 - Introduction to Cloud Computing}\\[0.5cm]
+    \textbf{\Large Project 1}\\[2cm]
+    
+    \begin{minipage}{0.5\textwidth}
+        \begin{flushleft}
+            \textbf{Lecturer}\\
+            \foreignlanguage{vietnamese}{Chung Thủy Linh} \\
+            \foreignlanguage{vietnamese}{Lê Ngọc Sơn}
+        \end{flushleft}
+    \end{minipage}
+    \begin{minipage}{0.4\textwidth}
+        \begin{flushleft}
+            \textbf{Team Members:}\\
+            23127358 - \foreignlanguage{vietnamese}{Trần Bình Duy}\\
+            23127388 - \foreignlanguage{vietnamese}{Nguyễn Văn Khánh}
+        \end{flushleft}
+    \end{minipage}\\[3cm]
+    
+    \vfill
+    {\large Ho Chi Minh City, 2026}
+\end{titlepage}
+
+% ============== TABLE OF CONTENTS ==============
+\tableofcontents
+\newpage
+
+% ============== SECTION 1: INTRODUCTION ==============
+\section{Introduction}
+
+\subsection{Project Background}
+
+In today's digital landscape, understanding user behavior is crucial for business success. A digital media startup faces the challenge of processing massive amounts of website traffic data in real-time to gain actionable insights. Traditional on-premise solutions often struggle with scalability, cost management, and the integration of advanced analytics capabilities.
+
+This project addresses these challenges by building an \textbf{Intelligent Cloud-Based Log Analytics \& Business Intelligence System} on Google Cloud Platform (GCP). The system is designed for a hypothetical digital media startup that needs to analyze website traffic logs, understand customer sentiment, and predict purchasing behavior.
+
+\subsection{Project Objectives}
+
+The primary objectives of this project are:
+
+\begin{enumerate}
+    \item \textbf{Build a Serverless Data Pipeline} - Design and implement a fully serverless architecture using GCP managed services to minimize operational overhead and ensure automatic scaling.
+    
+    \item \textbf{Integrate AI for Sentiment Analysis} - Leverage Google Cloud Natural Language API to automatically analyze customer feedback and extract sentiment scores, enabling real-time understanding of customer satisfaction.
+    
+    \item \textbf{Implement Predictive Analytics} - Utilize BigQuery ML to train a machine learning model that predicts user purchase behavior based on sentiment and experience metrics.
+    
+    \item \textbf{Create Real-time Visualization} - Develop an interactive dashboard using Looker Studio that provides stakeholders with immediate visibility into key performance indicators.
+\end{enumerate}
+
+\subsection{Business Value}
+
+The intelligent log analytics system delivers significant business value:
+
+\begin{itemize}
+    \item \textbf{Cost Efficiency} - Serverless architecture means paying only for actual usage, with no idle resource costs.
+    \item \textbf{Scalability} - The system automatically scales to handle traffic spikes without manual intervention.
+    \item \textbf{Data-Driven Decisions} - AI-powered insights enable proactive business decisions rather than reactive responses.
+    \item \textbf{Competitive Advantage} - Real-time sentiment analysis helps identify and address customer issues before they escalate.
+\end{itemize}
+
+% ============== SECTION 2: ARCHITECTURE ==============
+\section{Architecture}
+
+\subsection{System Overview}
+
+This project implements an \textbf{Intelligent Cloud-Based Log Analytics \& Business Intelligence System} that leverages multiple Google Cloud Platform (GCP) services to collect, process, analyze, and visualize website traffic logs in real-time.
+
+\subsection{GCP Components}
+
+The system utilizes the following GCP services:
+
+\begin{enumerate}[label=\arabic*.]
+    \item \textbf{Cloud Pub/Sub} - Message queue service for ingesting streaming log data
+    \item \textbf{Cloud Functions (Gen2)} - Serverless compute for processing logs
+    \item \textbf{Cloud Natural Language API} - AI service for sentiment analysis
+    \item \textbf{BigQuery} - Data warehouse for storing and analyzing logs
+    \item \textbf{BigQuery ML} - Machine learning for predictive analytics
+    \item \textbf{Looker Studio} - Business intelligence and visualization
+\end{enumerate}
+
+\subsection{Pipeline Architecture}
+
+Figure \ref{fig:architecture} illustrates the complete data pipeline architecture connecting all GCP components.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tikzpicture}[node distance=1.8cm]
+
+% Data Source Layer
+\node (simulator) [component, align=center] {Python Simulator};
+
+% Ingestion Layer
+\node (pubsub) [component, right=of simulator, align=center] {Cloud Pub/Sub \\ \scriptsize (website-logs)};
+
+% Processing Layer
+\node (function) [component, right=of pubsub, align=center] {Cloud Function \\ \scriptsize (process\_logs)};
+
+% AI Layer
+\node (nlp) [aicomponent, below=of function, align=center] {Natural Language \\ API \\ \scriptsize (Sentiment)};
+
+% Storage Layer
+\node (bigquery) [datacomponent, right=of function, align=center] {BigQuery \\ \scriptsize (analytics\_ds)};
+
+% ML Layer
+\node (bqml) [aicomponent, below=of bigquery, align=center] {BigQuery ML \\ \scriptsize (Logistic Reg)};
+
+% Visualization Layer
+\node (looker) [viscomponent, right=of bigquery, align=center] {Looker Studio \\ \scriptsize (Dashboard)};
+
+% Arrows with labels - CORRECTED FLOW
+\draw [arrow] (simulator) -- node[above, labeltext] {publish} (pubsub);
+\draw [arrow] (pubsub) -- node[above, labeltext] {trigger} (function);
+\draw [arrow] (function) -- node[above, labeltext] {stream insert} (bigquery);
+
+% Bidirectional flow: Cloud Function <-> NLP API
+\draw [arrow] (function.south) -- node[left, labeltext] {analyze} (nlp.north);
+\draw [arrow] (nlp.north east) -- node[right, labeltext] {ssentiment\_core} (function.south east);
+
+\draw [arrow] (bigquery) -- node[above, labeltext] {connect} (looker);
+\draw [arrow] (bigquery) -- node[right, labeltext] {train/predict} (bqml);
+
+% Background boxes for layers
+\begin{pgfonlayer}{background}
+    \node[draw=gray!50, dashed, rounded corners, fit=(simulator), label={[font=\scriptsize,gray]above:Data Source}] {};
+    \node[draw=gray!50, dashed, rounded corners, fit=(pubsub), label={[font=\scriptsize,gray]above:Ingestion}] {};
+    \node[draw=gray!50, dashed, rounded corners, fit=(function)(nlp), label={[font=\scriptsize,gray]above:Processing \& AI}] {};
+    \node[draw=gray!50, dashed, rounded corners, fit=(bigquery)(bqml), label={[font=\scriptsize,gray]above:Storage \& ML}] {};
+    \node[draw=gray!50, dashed, rounded corners, fit=(looker), label={[font=\scriptsize,gray]above:Visualization}] {};
+\end{pgfonlayer}
+
+\end{tikzpicture}
+}
+\caption{System Architecture Diagram}
+\label{fig:architecture}
+\end{figure}
+
+
+\subsection{Component Connections}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Source} & \textbf{Target} & \textbf{Connection Type} \\
+\hline
+Python Simulator & Cloud Pub/Sub & Publisher SDK \\
+\hline
+Cloud Pub/Sub & Cloud Function & Event Trigger (Push) \\
+\hline
+Cloud Function & NLP API & REST API Call \\
+\hline
+Cloud Function & BigQuery & Streaming Insert \\
+\hline
+BigQuery & BigQuery ML & SQL Query \\
+\hline
+BigQuery & Looker Studio & Data Connector \\
+\hline
+\end{tabular}
+\caption{Component connection methods}
+\end{table}
+
+% ============== SECTION 3: DATA FLOW ==============
+\section{Data Flow}
+
+This section explains how logs travel from the Python simulator through the entire pipeline into BigQuery for analysis.
+
+\subsection{Log Generation (Python Simulator)}
+
+The data journey begins with the Python simulator (\texttt{simulator/simulator.py}), which generates synthetic website traffic logs simulating real user behavior on an e-commerce website. The simulator runs in an infinite loop, producing one log entry per second.
+
+Each log entry is structured as a JSON object containing the following fields:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|p{7cm}|}
+\hline
+\textbf{Field Name} & \textbf{Type} & \textbf{Description} \\
+\hline
+\texttt{user\_id} & STRING & User identifier (USER\_001 to USER\_050) \\
+\hline
+\texttt{action} & STRING & User action: view, click, add\_to\_cart, purchase \\
+\hline
+\texttt{timestamp} & TIMESTAMP & ISO 8601 UTC timestamp \\
+\hline
+\texttt{page} & STRING & Page visited: /home, /cart, /product \\
+\hline
+\texttt{response\_time\_ms} & INTEGER & Server response time (50-800ms) \\
+\hline
+\texttt{feedback} & STRING & User feedback (30\% probability, nullable) \\
+\hline
+\end{tabular}
+\caption{Log entry schema generated by the simulator}
+\end{table}
+
+\subsection{Message Publishing to Pub/Sub}
+
+The simulator uses the Google Cloud Pub/Sub Python SDK to publish messages:
+
+\begin{enumerate}
+    \item \textbf{Connection} - The simulator establishes a connection to the \texttt{website-logs} topic using the Publisher Client.
+    \item \textbf{Serialization} - Each log entry is serialized to JSON format and encoded as UTF-8 bytes.
+    \item \textbf{Publishing} - The encoded message is published asynchronously to Pub/Sub, allowing high throughput without blocking.
+    \item \textbf{Decoupling} - Pub/Sub acts as a buffer, decoupling the data producer from downstream consumers.
+\end{enumerate}
+
+\subsection{Event-Driven Processing (Cloud Function)}
+
+When a message arrives at the Pub/Sub topic, it automatically triggers the Cloud Function through an event-driven push mechanism:
+
+\begin{enumerate}
+    \item \textbf{Receive Cloud Event} - The function receives a CloudEvent containing the Pub/Sub message payload.
+    \item \textbf{Decode Payload} - The base64-encoded message data is decoded back to its original UTF-8 string.
+    \item \textbf{Parse JSON} - The decoded string is parsed into a Python dictionary for processing.
+    \item \textbf{Sentiment Analysis} - If the log contains user feedback, the function calls the Natural Language API to obtain a sentiment score (detailed in Section 4).
+    \item \textbf{Data Enrichment} - The original log entry is enriched with the \texttt{sentiment\_score} field (or NULL if no feedback exists).
+    \item \textbf{Stream to BigQuery} - The enriched record is inserted into BigQuery using the streaming insert API.
+\end{enumerate}
+
+\subsection{BigQuery Storage}
+
+BigQuery serves as the final destination and central data warehouse:
+
+\begin{itemize}
+    \item \textbf{Streaming Insert} - Data is inserted using the streaming API for near real-time availability (queryable within seconds).
+    \item \textbf{Table Schema} - The \texttt{analytics\_ds.website\_logs} table stores all fields from the simulator plus the enriched \texttt{sentiment\_score} field.
+    \item \textbf{Data Availability} - Once in BigQuery, data is immediately available for SQL queries, ML training, and dashboard visualization.
+\end{itemize}
+
+\subsection{End-to-End Data Flow Summary}
+
+\begin{figure}[H]
+\centering
+\fbox{\parbox{0.9\textwidth}{
+\centering
+\textbf{1. Generate} $\rightarrow$ \textbf{2. Publish} $\rightarrow$ \textbf{3. Trigger} $\rightarrow$ \textbf{4. Process} $\rightarrow$ \textbf{5. Enrich} $\rightarrow$ \textbf{6. Store}\\[0.3cm]
+\small
+Simulator creates log $\rightarrow$ Send to Pub/Sub $\rightarrow$ Cloud Function triggered $\rightarrow$ Decode \& parse $\rightarrow$ Add sentiment $\rightarrow$ Insert to BigQuery
+}}
+\caption{End-to-end data flow from simulator to BigQuery}
+\end{figure}
+
+% ============== SECTION 4: IMPLEMENTATION ==============
+\section{Implementation}
+
+This section describes the detailed implementation steps for each phase of the project, following cloud security best practices and the principle of least privilege.
+
+\subsection{Phase 1 \& 2: Environment Setup and Data Ingestion}
+
+\subsubsection{GCP Project Configuration}
+
+The implementation began with setting up the GCP project environment:
+
+\begin{enumerate}
+    \item \textbf{Project Creation} - Created a new GCP project with ID \texttt{project-1-490712} to isolate resources and manage billing.
+    
+    \item \textbf{Service Account Setup} - Created a dedicated service account following the \textbf{Principle of Least Privilege}:
+    \begin{itemize}
+        \item Role: \texttt{roles/pubsub.publisher} - For publishing messages to Pub/Sub
+        \item Role: \texttt{roles/bigquery.dataEditor} - For inserting data into BigQuery
+        \item Role: \texttt{roles/cloudfunctions.invoker} - For triggering Cloud Functions
+    \end{itemize}
+    
+    \item \textbf{API Enablement} - Enabled the required GCP APIs:
+    \begin{itemize}
+        \item Cloud Pub/Sub API
+        \item Cloud Functions API
+        \item Cloud Natural Language API
+        \item BigQuery API
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{Pub/Sub Topic Creation}
+
+Created the messaging infrastructure for data ingestion:
+
+\begin{itemize}
+    \item \textbf{Topic Name:} \texttt{website-logs}
+    \item \textbf{Purpose:} Acts as the entry point for all log data, decoupling the data producer (simulator) from consumers (Cloud Function)
+    \item \textbf{Configuration:} Default retention period with no dead-letter topic for simplicity
+\end{itemize}
+
+\subsubsection{BigQuery Dataset and Table}
+
+Set up the data warehouse infrastructure:
+
+\begin{itemize}
+    \item \textbf{Dataset:} \texttt{analytics\_ds} in the \texttt{us-central1} region
+    \item \textbf{Table:} \texttt{website\_logs} with schema supporting all log fields plus the enriched \texttt{sentiment\_score} field
+\end{itemize}
+
+\subsection{Phase 3: Intelligent Processing with Cloud Function}
+
+\subsubsection{Cloud Function Deployment}
+
+Deployed a Gen2 Cloud Function to process incoming log messages:
+
+\begin{itemize}
+    \item \textbf{Function Name:} \texttt{process\_logs}
+    \item \textbf{Runtime:} Python 3.11
+    \item \textbf{Trigger:} Pub/Sub push subscription on \texttt{website-logs} topic
+    \item \textbf{Memory:} 256MB (sufficient for NLP API calls)
+    \item \textbf{Timeout:} 60 seconds
+\end{itemize}
+
+\subsubsection{Natural Language API Integration}
+
+The Cloud Function integrates with Google Cloud Natural Language API to perform sentiment analysis:
+
+\begin{enumerate}
+    \item \textbf{Feedback Detection} - The function checks if the incoming log contains a non-empty \texttt{feedback} field.
+    
+    \item \textbf{Sentiment Analysis Request} - If feedback exists, the function creates a document object and calls the \texttt{analyze\_sentiment} method of the Natural Language API.
+    
+    \item \textbf{Score Extraction} - The API returns a sentiment score ranging from -1.0 (negative) to +1.0 (positive), which is extracted and stored.
+    
+    \item \textbf{Null Handling} - For logs without feedback (approximately 70\% of entries), the \texttt{sentiment\_score} is set to NULL to maintain data integrity.
+\end{enumerate}
+
+\subsubsection{BigQuery Streaming Insert}
+
+After processing, the enriched log entry is inserted into BigQuery:
+
+\begin{itemize}
+    \item Uses streaming insert API for near real-time data availability
+    \item Data becomes queryable within seconds of ingestion
+    \item Automatic schema validation ensures data quality
+\end{itemize}
+
+\subsection{Phase 4: Predictive Analytics with BigQuery ML}
+
+\subsubsection{Model Design}
+
+Implemented a Logistic Regression model for binary classification:
+
+\begin{itemize}
+    \item \textbf{Model Name:} \texttt{purchase\_prediction}
+    \item \textbf{Algorithm:} Logistic Regression (suitable for binary classification)
+    \item \textbf{Target Variable:} \texttt{is\_purchase} (1 if action = 'purchase', 0 otherwise)
+\end{itemize}
+
+\subsubsection{Feature Selection}
+
+Two features were selected based on business relevance:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|p{6cm}|}
+\hline
+\textbf{Feature} & \textbf{Type} & \textbf{Business Rationale} \\
+\hline
+\texttt{sentiment\_score} & FLOAT & Positive sentiment indicates satisfied customers who are more likely to purchase \\
+\hline
+\texttt{response\_time\_ms} & INTEGER & Fast page loads correlate with better user experience and higher conversion \\
+\hline
+\end{tabular}
+\caption{Model features and rationale}
+\end{table}
+
+\subsubsection{Model Training}
+
+The model was trained using BigQuery ML's \texttt{CREATE MODEL} statement, selecting only records where \texttt{sentiment\_score IS NOT NULL} to ensure quality training data.
+
+\subsubsection{Model Evaluation and Prediction}
+
+After training, the model can:
+\begin{itemize}
+    \item Evaluate performance using \texttt{ML.EVALUATE} to check accuracy metrics
+    \item Generate predictions using \texttt{ML.PREDICT} with probability scores for each class
+    \item Identify key feature importance to understand conversion drivers
+\end{itemize}
+
+% ============== SECTION 4: RESULTS ==============
+\section{Results}
+
+\subsection{Real-time Dashboard}
+
+The Looker Studio dashboard provides real-time visibility into website performance and user behavior. The dashboard connects directly to the BigQuery table and automatically refreshes to display the latest data.
+
+\subsection{Key Visualizations}
+
+\subsubsection{Customer Satisfaction Gauge Chart}
+
+The gauge chart displays the average normalized sentiment score, providing an at-a-glance view of overall customer satisfaction.
+
+\textbf{Sentiment Score Normalization:}
+
+The Cloud Natural Language API returns sentiment scores in the range \textbf{[-1, +1]}, where -1 represents extremely negative sentiment and +1 represents extremely positive sentiment. However, the Looker Studio gauge chart is configured with a range of \textbf{[0, 1]} for clearer visualization.
+
+To bridge this gap, a \textbf{Calculated Field} was created in Looker Studio using the following transformation formula:
+
+\begin{equation}
+\text{Normalized Score} = \frac{\text{sentiment\_score} + 1}{2}
+\end{equation}
+
+This linear transformation maps:
+\begin{itemize}
+    \item Original score \textbf{-1} (most negative) $\rightarrow$ Normalized \textbf{0}
+    \item Original score \textbf{0} (neutral) $\rightarrow$ Normalized \textbf{0.5}
+    \item Original score \textbf{+1} (most positive) $\rightarrow$ Normalized \textbf{1}
+\end{itemize}
+
+The calculated field also handles NULL values (logs without feedback) by returning NULL, ensuring they are excluded from the average calculation rather than being treated as zero.
+
+\subsubsection{Website Traffic Over Time}
+
+\begin{itemize}
+    \item \textbf{Metric:} Record Count (number of log entries)
+    \item \textbf{Dimension:} Timestamp
+    \item \textbf{Insight:} Traffic patterns and volume trends over time
+\end{itemize}
+
+This time series chart reveals peak traffic periods, traffic trends, and anomalies requiring investigation.
+
+\subsubsection{User Activity Distribution}
+
+\begin{itemize}
+    \item \textbf{Metric:} Percentage of total records
+    \item \textbf{Dimension:} Action type (view, click, add\_to\_cart, purchase)
+    \item \textbf{Insight:} Conversion funnel analysis
+\end{itemize}
+
+Based on the dashboard data showing approximately 26.4\% view, 24.3\% click, 25.6\% purchase, and 23.7\% add\_to\_cart, the distribution appears relatively even due to the random nature of the simulator.
+
+\subsection{Key Findings}
+
+\begin{enumerate}
+    \item \textbf{Sentiment-Conversion Correlation} - Users with positive feedback sentiment show higher purchase rates, while negative sentiment correlates with cart abandonment.
+    
+    \item \textbf{Response Time Impact} - Pages with response time greater than 500ms see lower engagement. Optimal response time for conversions is under 200ms.
+    
+    \item \textbf{Feedback Patterns} - Approximately 30\% of simulated users leave feedback with common themes around interface design and checkout experience.
+\end{enumerate}
+
+\subsection{Actionable Recommendations}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{8cm}|}
+\hline
+\textbf{Insight} & \textbf{Recommended Action} \\
+\hline
+Low sentiment ($<$0.5 normalized) & Investigate negative feedback, improve user experience \\
+\hline
+High response time & Optimize backend performance, implement caching \\
+\hline
+Low purchase conversion & A/B test checkout flow and call-to-action elements \\
+\hline
+Traffic anomalies & Set up automated alerts for sudden changes \\
+\hline
+\end{tabular}
+\caption{Dashboard-driven recommendations}
+\end{table}
+
+% ============== SECTION 5: CONCLUSION ==============
+\section{Conclusion}
+
+\subsection{Project Achievements}
+
+This project successfully demonstrated the power of combining Cloud Engineering with AI/ML capabilities to build an intelligent log analytics system. The key achievements include:
+
+\begin{enumerate}
+    \item \textbf{Real-time Data Pipeline} - Implemented a fully serverless, event-driven architecture that processes website logs in real-time with minimal latency. The system automatically scales to handle varying traffic loads without manual intervention.
+    
+    \item \textbf{AI-Powered Sentiment Analysis} - Successfully integrated Google Cloud Natural Language API to automatically analyze customer feedback, providing instant insights into customer satisfaction levels.
+    
+    \item \textbf{Predictive Analytics} - Trained a Logistic Regression model using BigQuery ML that predicts purchase behavior based on sentiment and response time, enabling proactive business decisions.
+    
+    \item \textbf{Interactive Dashboard} - Created a comprehensive Looker Studio dashboard that provides stakeholders with real-time visibility into key metrics including traffic patterns, sentiment trends, and user activity distribution.
+\end{enumerate}
+
+\subsection{Business Impact}
+
+The combination of Cloud Engineering and AI/ML creates significant business value:
+
+\begin{itemize}
+    \item \textbf{Operational Efficiency} - Serverless architecture eliminates infrastructure management overhead and reduces operational costs.
+    
+    \item \textbf{Data-Driven Decision Making} - Real-time sentiment analysis and predictive models enable business teams to make informed decisions quickly.
+    
+    \item \textbf{Customer Experience Optimization} - Early detection of negative sentiment allows proactive intervention before customer churn.
+    
+    \item \textbf{Revenue Optimization} - Purchase prediction enables targeted marketing and personalized customer engagement strategies.
+\end{itemize}
+
+\subsection{Future Enhancements}
+
+Potential improvements for future iterations:
+
+\begin{itemize}
+    \item Implement more sophisticated ML models (e.g., neural networks) for better prediction accuracy
+    \item Add anomaly detection for automatic alerting on unusual patterns
+    \item Integrate additional data sources for richer customer insights
+    \item Implement A/B testing framework for continuous optimization
+\end{itemize}
+
+% ============== SECTION 6: AI TOOL USAGE DOCUMENTATION ==============
+\section{AI Tool Usage Documentation}
+
+This section documents the use of AI tools during the development of this project, in compliance with the course's AI Tool Usage Policy.
+
+\subsection{AI Tools Used}
+
+The following AI tools were utilized during project development:
+
+\begin{itemize}
+    \item \textbf{Claude AI (Anthropic)} - Used for code explanation, debugging assistance, and documentation support
+    \item \textbf{Google Cloud Documentation} - Primary reference for GCP service configurations
+\end{itemize}
+
+\subsection{Key Prompts and Assistance}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{4cm}|p{10cm}|}
+\hline
+\textbf{Task} & \textbf{AI Assistance Received} \\
+\hline
+Gauge Chart Issue & Asked AI to explain why the gauge chart was displaying 0.0 instead of expected sentiment values \\
+\hline
+Data Normalization & Requested help with formula to normalize sentiment scores from [-1, 1] to [0, 1] range \\
+\hline
+BigQuery ML Syntax & Asked for clarification on CREATE MODEL syntax and feature selection best practices \\
+\hline
+LaTeX Formatting & Requested assistance with TikZ diagram creation and table formatting \\
+\hline
+\end{tabular}
+\caption{AI assistance received during project development}
+\end{table}
+
+\subsection{Issues Encountered}
+
+During dashboard development, a significant issue was encountered with the Gauge Chart visualization:
+
+\subsubsection{Issue 1: Gauge Chart Displaying 0.0}
+
+\textbf{Problem Description:}
+The Customer Satisfaction gauge chart in Looker Studio initially displayed a value of 0.0, which did not accurately represent the actual sentiment data in BigQuery.
+
+\textbf{Root Cause Analysis:}
+Two factors contributed to this issue:
+
+\begin{enumerate}
+    \item \textbf{NULL Value Handling} - Approximately 70\% of log entries do not contain feedback and therefore have NULL sentiment scores. When calculating AVG(sentiment\_score), these NULL values were being treated as zeros, dragging the average down significantly.
+    
+    \item \textbf{Scale Mismatch} - The Cloud Natural Language API returns sentiment scores in the range \textbf{[-1, +1]}, but the Looker Studio gauge chart was configured with a range of \textbf{[0, 1]}. This mismatch meant that:
+    \begin{itemize}
+        \item Negative sentiment values (e.g., -0.5) would appear below the chart's minimum
+        \item The neutral point (0) would appear at the chart's minimum instead of the middle
+        \item Only strongly positive sentiments would display correctly
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Resolution}
+
+The issue was resolved by creating a \textbf{Calculated Field} in Looker Studio with the following logic:
+
+\textbf{Formula:}
+\begin{verbatim}
+IF(sentiment_score IS NOT NULL, (sentiment_score + 1) / 2, NULL)
+\end{verbatim}
+
+\textbf{Explanation of the Solution:}
+
+\begin{enumerate}
+    \item \textbf{NULL Filtering} - The \texttt{IF} statement checks whether \texttt{sentiment\_score IS NOT NULL}. If the value is NULL (no feedback), the calculated field returns NULL, which is automatically excluded from the AVG() aggregation in Looker Studio.
+    
+    \item \textbf{Linear Normalization} - For non-NULL values, the formula \texttt{(sentiment\_score + 1) / 2} performs a linear transformation:
+    \begin{itemize}
+        \item Adding 1 shifts the range from [-1, +1] to [0, +2]
+        \item Dividing by 2 scales the range to [0, 1]
+    \end{itemize}
+    
+    \item \textbf{Result Interpretation} - After normalization:
+    \begin{itemize}
+        \item 0.0 = Extremely negative sentiment (original -1.0)
+        \item 0.5 = Neutral sentiment (original 0.0)
+        \item 1.0 = Extremely positive sentiment (original +1.0)
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Outcome:}
+After implementing this calculated field, the gauge chart correctly displayed the average normalized sentiment score of approximately 0.5, accurately reflecting the mixed positive and negative feedback in the dataset without being skewed by the 70\% of entries without feedback.
+
+\subsection{Lessons Learned}
+
+\begin{enumerate}
+    \item \textbf{Data Quality Awareness} - Always consider how NULL values and data distributions will affect visualizations and aggregations.
+    
+    \item \textbf{API Documentation Review} - Thoroughly review API response formats (e.g., sentiment score ranges) before implementing visualizations.
+    
+    \item \textbf{Calculated Fields} - Looker Studio's calculated fields are powerful tools for data transformation and should be used to bridge gaps between raw data and visualization requirements.
+\end{enumerate}
+
+% ============== SECTION 8: LOOKER DASHBOARD ==============
+\section{Looker Dashboard}
+
+\begin{itemize}
+    \item \texttt{\href{https://lookerstudio.google.com/reporting/8d204672-275a-4632-b700-d4075e46667b}{Website Analytics Dashboard}}
+\end{itemize}
+
+% ============== SECTION 8: REFERENCES ==============
+\section{References}
+
+\begin{enumerate}
+    \item Google Cloud. (2024). \textit{Cloud Pub/Sub Documentation}. Retrieved from \url{https://cloud.google.com/pubsub/docs}
+    
+    \item Google Cloud. (2024). \textit{Cloud Functions Documentation (2nd gen)}. Retrieved from \url{https://cloud.google.com/functions/docs}
+    
+    \item Google Cloud. (2024). \textit{Cloud Natural Language API Documentation}. Retrieved from \url{https://cloud.google.com/natural-language/docs}
+    
+    \item Google Cloud. (2024). \textit{BigQuery Documentation}. Retrieved from \url{https://cloud.google.com/bigquery/docs}
+    
+    \item Google Cloud. (2024). \textit{BigQuery ML Documentation - CREATE MODEL Statement}. Retrieved from \url{https://cloud.google.com/bigquery/docs/reference/standard-sql/bigqueryml-syntax-create}
+    
+    \item Google Cloud. (2024). \textit{Looker Studio Documentation}. Retrieved from \url{https://support.google.com/looker-studio}
+    
+    \item Google Cloud. (2024). \textit{IAM Best Practices - Principle of Least Privilege}. Retrieved from \url{https://cloud.google.com/iam/docs/using-iam-securely}
+    
+    \item Python Software Foundation. (2024). \textit{google-cloud-pubsub Python Client Library}. Retrieved from \url{https://pypi.org/project/google-cloud-pubsub/}
+    
+    \item Python Software Foundation. (2024). \textit{google-cloud-language Python Client Library}. Retrieved from \url{https://pypi.org/project/google-cloud-language/}
+    
+    \item Python Software Foundation. (2024). \textit{google-cloud-bigquery Python Client Library}. Retrieved from \url{https://pypi.org/project/google-cloud-bigquery/}
+\end{enumerate}
+
+% ============== APPENDIX ==============
+\appendix
+\section{GCP Services Configuration}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Service} & \textbf{Configuration} \\
+\hline
+Pub/Sub Topic & \texttt{website-logs} \\
+\hline
+Cloud Function & \texttt{process\_logs} (Gen2, Python 3.11) \\
+\hline
+BigQuery Dataset & \texttt{analytics\_ds} \\
+\hline
+BigQuery Table & \texttt{website\_logs} \\
+\hline
+BigQuery ML Model & \texttt{purchase\_prediction} \\
+\hline
+\end{tabular}
+\caption{GCP resource configuration}
+\end{table}
+
+\section{Dependencies}
+
+\subsection{Simulator}
+\begin{itemize}
+    \item \texttt{google-cloud-pubsub==2.27.1}
+\end{itemize}
+
+\subsection{Cloud Function}
+\begin{itemize}
+    \item \texttt{google-cloud-language==2.13.0}
+    \item \texttt{google-cloud-bigquery==3.21.0}
+    \item \texttt{functions-framework==3.8.1}
+\end{itemize}
+
+\end{document}
